@@ -115,7 +115,7 @@ func (e *Engine) Output(path string) error {
 	for k, v := range cache {
 		out = append(out, &PrintData{
 			OriginalCommit:    k,
-			CherryPickCommits: removeDuplication(v),
+			CherryPickCommits: util.RemoveDuplication(v),
 		})
 	}
 
@@ -125,7 +125,7 @@ func (e *Engine) Output(path string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	log.Info().Msgf("cherry-pick analyze ok!")
+	log.Info().Msgf("cherry-pick analyze ok! you can get result in [%s]", path)
 	return nil
 }
 
