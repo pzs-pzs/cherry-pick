@@ -5,7 +5,7 @@ A pure go tool to analyze cherry-pick commit, output yaml file
 ## install
 
 ```
-go install github.com/pzs-pzs/cherry-pick@latest
+go install github.com/pzs-pzs/cherry-pick/cmd/pick@latest
 ```
 
 ## use
