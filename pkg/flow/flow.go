@@ -6,6 +6,7 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/pkg/errors"
 	"github.com/pzs-pzs/cherry-pick/pkg/printer"
+	"github.com/pzs-pzs/cherry-pick/pkg/util"
 	"github.com/rs/zerolog/log"
 	"sync"
 )
@@ -114,7 +115,7 @@ func (e *Engine) Output(path string) error {
 	for k, v := range cache {
 		out = append(out, &PrintData{
 			OriginalCommit:    k,
-			CherryPickCommits: v,
+			CherryPickCommits: removeDuplication(v),
 		})
 	}
 
@@ -125,5 +126,62 @@ func (e *Engine) Output(path string) error {
 		return errors.WithStack(err)
 	}
 	log.Info().Msgf("cherry-pick analyze ok!")
+	return nil
+}
+
+func removeDuplication(in []string) (out []string) {
+	t := make(map[string]struct{})
+	for _, v := range in {
+		if _, ok := t[v]; ok {
+			continue
+		}
+		out = append(out, v)
+		t[v] = struct{}{}
+	}
+	return
+}
+
+// Run 执行分析cherry-pick的所有组件的flow
+func Run(repo, out string) error {
+	log.Info().Msgf("repo is [%s] out is [%s]", repo, out)
+	err := check(repo, out)
+	if err != nil {
+		return err
+	}
+	return run(repo, out)
+}
+
+func check(repo, out string) error {
+	if repo == "" {
+		return errors.New("invalid repo,repo is empty")
+	}
+	if out == "" {
+		return errors.New("path is empty, plz check")
+	}
+
+	exists, err := util.PathExists(out)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errors.Errorf("[%s] already exist", out)
+	}
+	return nil
+}
+
+func run(repo, out string) error {
+	engine := NewEngine()
+	err := engine.Init(repo)
+	if err != nil {
+		return err
+	}
+	go func() {
+		engine.Start()
+	}()
+
+	err = engine.Output(out)
+	if err != nil {
+		return err
+	}
 	return nil
 }
