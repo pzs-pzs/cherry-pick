@@ -36,4 +36,3 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
-replace github.com/libgit2/git2go/v33 v33.0.9 => ../git2go
