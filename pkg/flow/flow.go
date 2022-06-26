@@ -10,6 +10,7 @@ import (
 	"sync"
 )
 
+// NewEngine 初始化处理流程的核心控制器
 func NewEngine() *Engine {
 	return &Engine{
 		worker: make(chan Worker, 100),
@@ -18,23 +19,28 @@ func NewEngine() *Engine {
 	}
 }
 
-type Engine struct {
-	worker chan Worker
-	rst    []*CherryCommit
-	mutex  sync.Mutex
-	p      printer.Printer
-	wg     sync.WaitGroup
-}
-
-type CherryCommit struct {
-	ID   string
-	From string
-}
-
-func (e *Engine) Init(url string) error {
-	if url == "" {
-		return errors.New("invalid url,url is empty")
+type (
+	Engine struct {
+		worker chan Worker
+		rst    []*CherryCommit
+		mutex  sync.Mutex
+		p      printer.Printer
+		wg     sync.WaitGroup
 	}
+
+	CherryCommit struct {
+		ID   string
+		From string
+	}
+
+	PrintData struct {
+		OriginalCommit    string   `yaml:"original_commit"`
+		CherryPickCommits []string `yaml:"cherry_pick_commits"`
+	}
+)
+
+// Init 初始化源数据，从远端获取，按照分支的粒度分发到对对应的 Worker
+func (e *Engine) Init(url string) error {
 	log.Info().Msgf("start clone [%s] to local", url)
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
 		URL: url,
@@ -69,6 +75,7 @@ func (e *Engine) Init(url string) error {
 	return nil
 }
 
+// Start 并发处理每个分支的cherry-pick日志分析，找出所有的commit封装到 CherryCommit
 func (e *Engine) Start() {
 
 	for {
@@ -93,12 +100,12 @@ func (e *Engine) Start() {
 
 }
 
-func (e *Engine) OutPut(path string) error {
+// Output 将所有的 CherryCommit 进行处理，并输出到指定yaml文件
+func (e *Engine) Output(path string) error {
 	e.wg.Wait()
 
 	cache := make(map[string][]string)
 	for _, commit := range e.rst {
-		log.Info().Msgf("%+v", commit)
 		t := cache[commit.From]
 		t = append(t, commit.ID)
 		cache[commit.From] = t
@@ -111,12 +118,12 @@ func (e *Engine) OutPut(path string) error {
 		})
 	}
 
-	return e.p.Print(path, func() interface{} {
+	err := e.p.Print(path, func() interface{} {
 		return out
 	})
-}
-
-type PrintData struct {
-	OriginalCommit    string   `yaml:"original_commit"`
-	CherryPickCommits []string `yaml:"cherry_pick_commits"`
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	log.Info().Msgf("cherry-pick analyze ok!")
+	return nil
 }

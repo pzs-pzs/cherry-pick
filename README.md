@@ -1,16 +1,24 @@
 # cherry-pick
 
-A tool to analyze cherry-pick commit, output yaml file
-
-## require
-
-+ this repository use ```git cherry-pick -x```
+A pure go tool to analyze cherry-pick commit, output yaml file
 
 ## install
 
-```go get -u cherry-pick@latest```
+```go install github.com/pzs-pzs/cherry-pick@latest```
+
+## use
+
+```shell
+pick -r "https://github.com/pzs-pzs/galen" -o rst.yaml
+```
 
 ## feature
 
-+ support all cherry-pick commit analysis
+- [x] support analyze repository use ```git cherry-pick -x```
+- [ ] support all cherry-pick commit analysis
 
+## lib
+
+```url
+https://github.com/go-git/go-git
+```
