@@ -16,7 +16,7 @@ func main() {
 		Short: "A tool to analyze cherry-pick commit, output yaml file",
 	}
 	analyze := &cobra.Command{
-		Use:   "cherry-pick analyze",
+		Use:   "analyze",
 		Short: "A tool to analyze cherry-pick commit, output yaml file",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := check(repo, out)
