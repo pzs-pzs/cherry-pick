@@ -35,4 +35,3 @@ require (
 	golang.org/x/sys v0.0.0-20220624220833-87e55d714810 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
