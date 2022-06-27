@@ -131,18 +131,6 @@ func (e *Engine) Output(path string) error {
 	return nil
 }
 
-func removeDuplication(in []string) (out []string) {
-	t := make(map[string]struct{})
-	for _, v := range in {
-		if _, ok := t[v]; ok {
-			continue
-		}
-		out = append(out, v)
-		t[v] = struct{}{}
-	}
-	return
-}
-
 // Run 执行分析cherry-pick的所有组件的flow
 func Run(repo, out string) error {
 	log.Info().Msgf("repo is [%s] out is [%s]", repo, out)
