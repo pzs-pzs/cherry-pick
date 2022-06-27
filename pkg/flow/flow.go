@@ -8,6 +8,7 @@ import (
 	"github.com/pzs-pzs/cherry-pick/pkg/printer"
 	"github.com/pzs-pzs/cherry-pick/pkg/util"
 	"github.com/rs/zerolog/log"
+	"os"
 	"sync"
 )
 
@@ -44,7 +45,8 @@ type (
 func (e *Engine) Init(url string) error {
 	log.Info().Msgf("start clone [%s] to local", url)
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
-		URL: url,
+		URL:      url,
+		Progress: os.Stdout,
 	})
 	if err != nil {
 		return errors.WithStack(err)
